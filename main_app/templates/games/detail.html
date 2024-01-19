@@ -88,11 +88,13 @@
                     <small>Tip by {{ tip.author.username }} on {{ tip.created_at|date:"Y-m-d" }}</small>
                 </div>
                 {% if user.is_authenticated and user == tip.author %}
-                <form action="{% url 'delete_tip' tip.id %}" method="post">
+                <div>
+                <form action="{% url 'delete_tip' tip.id %}" method="post" style="display: inline-block;">
                     {% csrf_token %}
-                    <button style="margin-top: -.5rem;" type="submit" class="btn red">Delete</button>
-                    <button style="margin-top: -.5rem;" class="btn red" onclick="toggleTipEdit('{{ tip.id }}')">Edit</button>
+                    <button style="margin-top: -.5rem;" type="submit" class="btn red" style="display: inline-block;">Delete</button>
                 </form>
+                <button style="margin-top: -.5rem;" class="btn red" onclick="toggleTipEdit('{{ tip.id }}')">Edit</button>
+                </div>
             {% endif %}
                 <div class="tip white-text card grey" id="tip-edit-{{ tip.id }}" style="display: none;">
                     <form onsubmit="updateTip('{{ tip.id }}', event)">
