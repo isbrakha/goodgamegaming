@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load widget_tweaks %}
+<style>
+    .margin {
+        margin-left: 20px; 
+        margin-right: 20px;
+    }
+</style>
+<h3 class="white-text">Sign Up</h3>
+<p class="red-text error">{{ error_message|linebreaksbr }}</p>
+<form method="POST" action="{% url 'signup' %}" class="col s12 mx-l">
+    {% csrf_token %}
+    <div class="row">
+        {% for field in form %}
+            <div class="input-field col s12">
+                {{ field.label_tag }}
+                {{ field|add_class:"white-text" }}
+            </div>
+        {% endfor %}
+    </div>
+    <input type="submit" class="btn red" value="Sign Up">
+</form>
+<br/>
+<a href="{% url 'login' %}">Already have an account? Click here!</a>
+
+{% endblock %}

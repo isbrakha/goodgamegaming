@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load widget_tweaks %}
+<div class="row game-detail">
+    <!-- Image Column -->
+    <div class="col s12 m6">
+        <img class="responsive-img" src="{{ game.image }}" alt="{{ game.name }} Image">
+    </div>
+
+    <!-- Details Column -->
+    <div class="col s12 m6">
+        <h3 class="white-text">{{ game.name }}</h3>
+        <p class="white-text">Rating: {{ game.rating }}</p>
+        <p class="white-text">Released: {{ game.released }}</p>
+        <!-- Add more details as needed -->
+    </div>
+</div>
+
+{% if user.is_authenticated %}
+    <button id="show-review-form-btn" class="btn red">Add Review</button>
+    <button id="show-tip-form-btn" class="btn red">Add Tip</button>
+    <div id="review-form" style="display: none;">
+        <div class="review-form">
+            <h3 class="white-text">Write a Review</h3>
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="input-field col s12">
+                        {{ field.label_tag }}
+                        {{ field|add_class:"white-text" }}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn red">Submit Review</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div id="tip-form" style="display: none;">
+        <div class="tip-form">
+            <h3 class="white-text">Write a Tip</h3>
+            <form  method="post">  <!-- Replace 'tip_create_url' with your actual URL name -->
+                {% csrf_token %}
+                {% for field in tip_form %}
+                    <div class="input-field col s12">
+                        {{ field.label_tag }}
+                        {{ field|add_class:"white-text" }}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn red">Submit Tip</button>
+            </form>
+        </div>
+    </div>
+{% else %}
+    <p class="white-text"><a href="{% url 'login' %}">Log in</a> to write a review, or add a game tip.</p>
+{% endif %}
+
+    <!-- Existing Reviews -->
+    <div class="row">
+        <div class="col s12 m6">
+            <div class="reviews">
+                <h3 class="white-text">Reviews</h3>
+                {% for review in reviews %}
+                    <div class="review white-text card grey">
+                        <h4>{{ review.title }}</h4>
+                        <p>{{ review.content }}</p>
+                        <small>Rating: {{ review.rating }} - Reviewed by {{ review.author.username }} on {{ review.created_at|date:"Y-m-d" }}</small>              
+                    </div>
+                    {% if user.is_authenticated and user == review.author %}
+                    <form style="margin-top: -.5rem;"action="{% url 'delete_review' review.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn red">Delete</button>
+                    </form>
+                {% endif %}
+                {% empty %}
+                    <p class="white-text">No reviews yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col s12 m6">
+            <div class="tips">
+                <h3 class="white-text">Tips</h3>
+                {% for tip in tips %}
+                <!-- Update the form elements with data attributes for identification -->
+                <div class="tip white-text card grey" id="tip-display-{{ tip.id }}">
+                    <h4 class="white-text">{{ tip.title }}</h4>
+                    <p data-tip-id="{{ tip.id }}">{{ tip.content }}</p>
+                    <small>Tip by {{ tip.author.username }} on {{ tip.created_at|date:"Y-m-d" }}</small>
+                </div>
+                {% if user.is_authenticated and user == tip.author %}
+                <form action="{% url 'delete_tip' tip.id %}" method="post">
+                    {% csrf_token %}
+                    <button style="margin-top: -.5rem;" type="submit" class="btn red">Delete</button>
+                    <button style="margin-top: -.5rem;" class="btn red" onclick="toggleTipEdit('{{ tip.id }}')">Edit</button>
+                </form>
+            {% endif %}
+                <div class="tip white-text card grey" id="tip-edit-{{ tip.id }}" style="display: none;">
+                    <form onsubmit="updateTip('{{ tip.id }}', event)">
+                        {% csrf_token %}
+                        <h4>{{ tip.title }}</h4>
+                        <textarea data-tip-id="{{ tip.id }}" name="content">{{ tip.content }}</textarea>
+                        <button type="submit">Save</button>
+                        <button type="button" onclick="toggleTipEdit('{{ tip.id }}')">Cancel</button>
+                    </form>
+                </div>
+            </div>
+                    <!-- Delete Button for User's Own Tips -->
+                {%empty%}
+                    <p class="white-text">No tips yet.</p>
+                {% endfor %}
+            </div>
+        </div>    
+    </div>
+    <!-- Column for Additional Content Below Reviews -->
+</div>
+
+<script>
+    let reviewFormBtn = document.getElementById('show-review-form-btn');
+    let tipFormBtn = document.getElementById('show-tip-form-btn');
+    let reviewForm = document.getElementById('review-form');
+    let tipForm = document.getElementById('tip-form');
+
+    reviewFormBtn.addEventListener('click', function() {
+        if (reviewForm.style.display === 'none' || reviewForm.style.display === '') {
+            reviewForm.style.display = 'block';
+            tipForm.style.display = 'none'; // Hide the tip form when showing review form
+        } else {
+            reviewForm.style.display = 'none';
+        }
+    });
+
+    tipFormBtn.addEventListener('click', function() {
+        if (tipForm.style.display === 'none' || tipForm.style.display === '') {
+            tipForm.style.display = 'block';
+            reviewForm.style.display = 'none'; // Hide the review form when showing tip form
+        } else {
+            tipForm.style.display = 'none';
+        }
+    });
+
+    function toggleTipEdit(tipId, formIsValid) {
+        let displayDiv = document.getElementById('tip-display-' + tipId);
+        let editDiv = document.getElementById('tip-edit-' + tipId);
+        let errorMsg = document.getElementById('error-msg')
+        if (displayDiv.style.display === 'none') {
+            displayDiv.style.display = 'block';
+            editDiv.style.display = 'none';
+        } else {
+            displayDiv.style.display = 'none';
+            editDiv.style.display = 'block';
+        }
+    }
+
+
+    function updateTip(tipId, event) {
+    event.preventDefault(); // Prevent default form submission
+    let content = document.querySelector(`textarea[data-tip-id="${tipId}"]`).value;
+
+    $.ajax({
+        url: `/update-tip/${tipId}/`, 
+        method: 'POST',
+        data: {
+            content: content,
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+        },
+        success: function(response) {
+            // Update the displayed content with the edited content
+            document.querySelector(`p[data-tip-id="${tipId}"]`).textContent = content;
+            toggleTipEdit(tipId, true); // Hide  edit form
+        }
+    });
+}
+    
+</script>
+
+
+{% endblock %}

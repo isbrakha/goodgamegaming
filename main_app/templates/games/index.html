@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>List of Games</h1>
+  <div class="row">
+    {% for game in games %}
+      <div class="col s12 m6 l4">
+        <a href="{% url 'game_detail' game.id %}">
+          <div class="game-info card grey">
+            <div class="card-image image-container">
+                <img class="responsive-img" style="padding: .2rem; max-height: 100%;" src="{{ game.background_image }}" alt="{{ game.name }} Image">
+            </div>
+            <div class="card-content">
+              <div class="col s8">
+                <h2 class="white-text flow-text" style="margin-top: -.1rem ;">{{ game.name }}</h2>
+              </div>
+              <div class="col s4">
+                <h2 class="yellow-text flow-text" style="margin-top: -.2rem;">{{ game.rating }}</h2>
+              </div>
+              <!-- Add to Liked button with data-game-id attribute -->
+              <button class="add-to-liked-button" 
+                  data-game-id="{{ game.id }}"
+                  data-game-name="{{ game.name }}"
+                  data-game-rating="{{ game.rating }}"
+                  data-game-released="{{ game.released }}"
+                  data-game-image="{{ game.background_image }}"
+                  data-game-platforms="{{ game.platforms}}"
+                  data-game-developer="{{ game.developer }}"
+                  data-game-publisher="{{ game.publisher }}"
+                  data-game-description="{{ game.description }}"
+                  data-game-esrb-rating="{{ game.esrb_rating }}"
+                  data-game-genres="{{ game.genre_names|join:', ' }}">
+                  Add to Liked
+              </button>
+            </div>
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+  <button id="load-more" data-next-page="{{ next_page }}">Load More Games</button>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+let nextPage = 2; // Initialize nextPage variable
+
+document.getElementById('load-more').addEventListener('click', function() {
+  fetch(`/games/?page=${nextPage}`, {
+      headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+      }
+  })
+  .then(response => response.json())
+  .then(data => {
+      // Assuming data.results contains the array of games
+      data.results.forEach(game => {
+          // Create game elements and append to the page
+          // For example, create a div for each game and append to a container on your page
+          const gameDiv = document.createElement('div');
+          gameDiv.className = 'col s12 m6 l4';
+          // Populate gameDiv with game details
+          gameDiv.innerHTML = `<a href="/games/${game.id}">
+                                  <div class="game-info card grey">
+                                      <div class="card-image image-container">
+                                          <img class="responsive-img" style="padding: .2rem; max-height: 100%;" src="${game.background_image}" alt="${game.name} Image">
+                                      </div>
+                                      <div class="card-content">
+                                          <div class="col s8">
+                                              <h2 class="white-text flow-text" style="margin-top: -.1rem;">${game.name}</h2>
+                                          </div>
+                                          <div class="col s4">
+                                              <h2 class="yellow-text flow-text" style="margin-top: -.2rem;">${game.rating}</h2>
+                                          </div>
+                                          <button class="add-to-liked-button" 
+                                            data-game-id="{{ game.id }}"
+                                            data-game-name="{{ game.name }}"
+                                            data-game-rating="{{ game.rating }}"
+                                            data-game-released="{{ game.released }}"
+                                            data-game-image="{{ game.background_image }}"
+                                            data-game-platforms="{{ game.platforms}}"
+                                            data-game-developer="{{ game.developer }}"
+                                            data-game-publisher="{{ game.publisher }}"
+                                            data-game-description="{{ game.description }}"
+                                            data-game-esrb-rating="{{ game.esrb_rating }}"
+                                            data-game-genres="{{ game.genre_names|join:', ' }}">
+                                            Add to Liked
+                                        </button>
+                                      </div>
+                                  </div>
+                              </a>`;
+          // Append the new gameDiv to your games container
+          document.querySelector('.row').appendChild(gameDiv);
+      });
+      nextPage++; // Increment nextPage for the next load
+  })
+  .catch(error => console.error('Error:', error));
+});
+
+  function sanitizePlatformData(platformData) {
+    // Replace double quotes within the class attribute with single quotes
+    const sanitizedData = platformData.replace(/'(?![^<]*>)/g, '"');
+    const finalizedSanitizedData = sanitizedData.replace(/class="([^"]*)"/g, 'class=\'$1\'');
+    
+    return finalizedSanitizedData;
+  }
+    // JavaScript/jQuery function to handle the "Add to Liked" button click
+  $(document).ready(function() {
+      $('.add-to-liked-button').on('click', function(e) {
+          e.preventDefault();
+          const button = $(this);
+          const genresData = button.data('game-genres').split(', ');
+          const genreNames = genresData.map(genre => genre.name);
+
+          const fixedPlatformData = sanitizePlatformData(button.data('game-platforms'))
+          .replace(/None/g, 'null')
+          const platformData = JSON.parse(fixedPlatformData);
+          const platformNames = platformData.map(platforms => platforms.platform.name)
+          const gameData = {
+              id: button.data('game-id'),
+              name: button.data('game-name'),
+              rating: button.data('game-rating'),
+              released: button.data('game-released'),
+              image: button.data('game-image'),
+              platforms: platformNames,
+              developer: button.data('game-developer'),
+              publisher: button.data('game-publisher'),
+              description: button.data('game-description'),
+              esrb_rating: button.data('game-esrb-rating'),
+              genres: genreNames
+          };
+          $.ajax({
+              type: 'POST',
+              url: '{% url "add_game" %}',
+              data: {
+                  csrfmiddlewaretoken: '{{ csrf_token }}',
+                  game_data: JSON.stringify(gameData) // Convert the object to a JSON string
+              },
+              success: function(response) {
+                  console.log(response, "succes");
+                  button.text('Added to Liked').prop('disabled', true);
+              },
+              error: function(error) {
+                  console.error(error.responseJSON.error);
+              }
+          });
+      });
+
+  });
+</script>
+{% endblock %}
