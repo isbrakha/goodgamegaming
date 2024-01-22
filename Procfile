@@ -1,1 +1,1 @@
-web: gunicorn ggg2.wsgi
+web: gunicorn ggg2-deploy.wsgi
