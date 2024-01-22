@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-jptp$u29wkwghooln7*0g*+)r@p3pjq-22s)&w)q1&uug*x)(h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['goodgamegaming-dfd0a2474432.herokuapp.com']
 
 
 # Application definition
@@ -124,5 +124,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 #Django Deployment on Heroku
-# import django_on_heroku
-# django_on_heroku.settings(locals())
+import django_on_heroku
+django_on_heroku.settings(locals())
