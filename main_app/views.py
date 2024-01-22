@@ -48,8 +48,8 @@ def games_index(request):
         data = response.json()
         return JsonResponse(data)  # Send JSON response back to AJAX request
 
-    user_profile = UserProfile.objects.get(user=request.user)
-    liked_game_ids = user_profile.liked_games.values_list('id', flat=True)
+    # user_profile = UserProfile.objects.get(user=request.user)
+    # liked_game_ids = user_profile.liked_games.values_list('id', flat=True)
 
 
     url = 'https://api.rawg.io/api/games?key=b714af7bd53b4d389217d6baab2bbdad&page=1&page_size=30'
@@ -63,7 +63,7 @@ def games_index(request):
 
         game['genre_names'] = genre_names
 
-    return render(request, 'games/index.html', {'games': games, 'liked_game_ids': liked_game_ids})
+    return render(request, 'games/index.html', {'games': games})
 
 
 @login_required

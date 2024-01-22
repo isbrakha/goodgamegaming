@@ -16,7 +16,7 @@
                 <h2 class="yellow-text flow-text" style="margin-top: -.2rem;">{{ game.rating }}</h2>
               </div>
               <!-- Add to Liked button with data-game-id attribute -->
-              {% if game.id not in liked_game_ids %}
+              <!-- {% if game.id not in liked_game_ids %} -->
               <button class="add-to-liked-button" 
                   data-game-id="{{ game.id }}"
                   data-game-name="{{ game.name }}"
@@ -31,11 +31,11 @@
                   data-game-genres="{{ game.genre_names|join:', ' }}">
                   Add to Liked
               </button>
-              {% else %}
+              <!-- {% else %} -->
               <button class="added-to-liked-button" disabled>
                 Liked
               </button>
-              {% endif %}
+              <!-- {% endif %} -->
             </div>
           </div>
         </a>
