@@ -1,1 +1,1 @@
-web: gunicorn goodgamegaming.wsgi
+web: gunicorn ggg2.wsgi
