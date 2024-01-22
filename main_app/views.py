@@ -45,7 +45,7 @@ def games_index(request):
         data = response.json()
         return JsonResponse(data)  # Send JSON response back to AJAX request
 
-    # The initial, non-AJAX request loads the page normally with the first set of games
+   
     url = 'https://api.rawg.io/api/games?key=b714af7bd53b4d389217d6baab2bbdad&page=1&page_size=30'
     response = requests.get(url)
     data = response.json()
@@ -82,7 +82,7 @@ def add_to_liked(request):
             )
 
             user = request.user
-            print('userprint',user)
+            print('userprint',user.add_to_liked)
 
 
             

@@ -146,7 +146,7 @@ document.getElementById('load-more').addEventListener('click', function() {
                   genres: genreNames
               
               };
-              console.log(gameData.esrb_rating)
+              
               $.ajax({
                   type: 'POST',
                   url: '{% url "add_game" %}',
