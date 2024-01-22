@@ -16,26 +16,30 @@
                 <h2 class="yellow-text flow-text" style="margin-top: -.2rem;">{{ game.rating }}</h2>
               </div>
               <!-- Add to Liked button with data-game-id attribute -->
-              <!-- {% if game.id not in liked_game_ids %} -->
-              <button class="add-to-liked-button" 
-                  data-game-id="{{ game.id }}"
-                  data-game-name="{{ game.name }}"
-                  data-game-rating="{{ game.rating }}"
-                  data-game-released="{{ game.released }}"
-                  data-game-image="{{ game.background_image }}"
-                  data-game-platforms="{{ game.platforms}}"
-                  data-game-developer="{{ game.developer }}"
-                  data-game-publisher="{{ game.publisher }}"
-                  data-game-description="{{ game.description }}"
-                  data-game-esrb-rating="{{ game.esrb_rating }}"
-                  data-game-genres="{{ game.genre_names|join:', ' }}">
-                  Add to Liked
-              </button>
-              <!-- {% else %} -->
-              <!-- <button class="added-to-liked-button" disabled>
-                Liked
-              </button> -->
-              <!-- {% endif %} -->
+              {% if not request.user.is_authenticated %}
+                <button></button>
+              {% else %}
+                {% if game.id not in liked_game_ids %}
+                <button class="add-to-liked-button" 
+                    data-game-id="{{ game.id }}"
+                    data-game-name="{{ game.name }}"
+                    data-game-rating="{{ game.rating }}"
+                    data-game-released="{{ game.released }}"
+                    data-game-image="{{ game.background_image }}"
+                    data-game-platforms="{{ game.platforms}}"
+                    data-game-developer="{{ game.developer }}"
+                    data-game-publisher="{{ game.publisher }}"
+                    data-game-description="{{ game.description }}"
+                    data-game-esrb-rating="{{ game.esrb_rating }}"
+                    data-game-genres="{{ game.genre_names|join:', ' }}">
+                    Add to Liked
+                </button>
+                {% else %}
+                <button class="added-to-liked-button" disabled>
+                  Liked
+                </button>
+                {% endif %}
+              {% endif %}
             </div>
           </div>
         </a>
