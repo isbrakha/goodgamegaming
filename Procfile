@@ -1,1 +1,1 @@
-web: gunicorn ggg2-deploy.wsgi
+web: gunicorn goodgamegaming.wsgi
