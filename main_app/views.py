@@ -4,12 +4,13 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 import requests
 from django.http import JsonResponse
-from .models import Game, Review, Tip
+from .models import Game, Review, Tip, UserProfile
 from .forms import ReviewForm, TipForm
 from datetime import datetime
 import json, requests, re
 from .utils import save_game_to_database
 from django.core.paginator import Paginator
+from .models import UserProfile
 
 
 def home(request):
@@ -23,7 +24,9 @@ def signup(request):
     if form.is_valid():
       # This will add the user to the database
       user = form.save()
-      # This is how we log a user in via code
+      # create userProfile
+      UserProfile.objects.create(user=user)
+      # log in after sign up
       login(request, user)
       return redirect('home')
     else:
@@ -45,7 +48,10 @@ def games_index(request):
         data = response.json()
         return JsonResponse(data)  # Send JSON response back to AJAX request
 
-   
+    user_profile = UserProfile.objects.get(user=request.user)
+    liked_game_ids = user_profile.liked_games.values_list('id', flat=True)
+
+
     url = 'https://api.rawg.io/api/games?key=b714af7bd53b4d389217d6baab2bbdad&page=1&page_size=30'
     response = requests.get(url)
     data = response.json()
@@ -57,7 +63,7 @@ def games_index(request):
 
         game['genre_names'] = genre_names
 
-    return render(request, 'games/index.html', {'games': games})
+    return render(request, 'games/index.html', {'games': games, 'liked_game_ids': liked_game_ids})
 
 
 @login_required
@@ -65,34 +71,42 @@ def add_to_liked(request):
     if request.method == 'POST':
         try:
             game_data = json.loads(request.POST.get('game_data'))
-            Game.objects.get_or_create(
-                id=game_data['id'],
-                name=game_data['name'],
-                rating=game_data['rating'],
-                released=datetime.strptime(game_data['released'], '%Y-%m-%d').date() if game_data['released'] else None,
-                image=game_data['image'],
-                platforms=game_data['platforms'],
-                developer=game_data['developer'],
-                publisher=game_data['publisher'],
-                description=game_data['description'],
-                esrb_rating=game_data['esrb_rating'],
-                genres=game_data['genres'],
-                # user=request.user
-                
+            game_id = game_data.get('id')
+
+            if not game_id:
+                return JsonResponse({'error': 'Game ID is missing'}, status=400)
+
+            # Parsing date fields
+            released_date = None
+            if game_data.get('released'):
+                released_date = datetime.strptime(game_data['released'], '%Y-%m-%d').date()
+
+            # Using get_or_create with proper defaults
+            game, created = Game.objects.get_or_create(
+                id=game_id,
+                defaults={
+                    'name': game_data.get('name', ''),
+                    'rating': game_data.get('rating', 0.0),
+                    'released': released_date,
+                    'image': game_data.get('image', ''),
+                    'platforms': game_data.get('platforms', []),
+                    'developer': game_data.get('developer', ''),
+                    'publisher': game_data.get('publisher', ''),
+                    'description': game_data.get('description', ''),
+                    'esrb_rating': game_data.get('esrb_rating', ''),
+                    'genres': game_data.get('genres', []),
+                }
             )
 
-            user = request.user
-            print('userprint',user.add_to_liked)
-
-
-            
+            user_profile = UserProfile.objects.get(user=request.user)
+            user_profile.liked_games.add(game)
 
             return JsonResponse({'success': 'Game added successfully.'})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
-    
+
 
 def game_detail(request, game_id):
     url = f'https://api.rawg.io/api/games/{game_id}?key=b714af7bd53b4d389217d6baab2bbdad'

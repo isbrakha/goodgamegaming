@@ -17,6 +17,7 @@
                 <h2 class="yellow-text flow-text" style="margin-top: -.2rem;">{{ game.rating }}</h2>
               </div>
               <!-- Add to Liked button with data-game-id attribute -->
+              {% if game.id not in liked_game_ids %}
               <button class="add-to-liked-button" 
                   data-game-id="{{ game.id }}"
                   data-game-name="{{ game.name }}"
@@ -31,6 +32,11 @@
                   data-game-genres="{{ game.genre_names|join:', ' }}">
                   Add to Liked
               </button>
+              {% else %}
+              <button class="added-to-liked-button" disabled>
+                Liked
+              </button>
+              {% endif %}
             </div>
           </div>
         </a>
@@ -157,6 +163,9 @@ document.getElementById('load-more').addEventListener('click', function() {
                   success: function(response) {
                       button.text('Added to Liked').prop('disabled', true);
                   },
+                  error: function(error) {
+                    console.error('Error:', error.responseJSON.error);
+            }
             })
           });
       });

@@ -7,8 +7,8 @@ GoodGameGaming - A Modern Gaming Review and Tips Platform
 GoodGameGaming is an innovative web application designed for gaming enthusiasts. It offers a comprehensive platform for users to explore, review, and share tips about their favorite video games. The application features a user-friendly interface, integrating gaming news, reviews, and community discussions.
 
 ## Screenshot(s)
-![Landing Page](public/landing-page-ss)
-![Game Detail](public/game-detail-ss)
+![Landing Page](public/landing-page-ss.png)
+![Game Detail](public/game-detail-ss.png)
 
 *Add more screenshots if necessary, and replace `path_to_landing_page_screenshot.png` with the actual file path of your screenshot.*
 
@@ -29,3 +29,10 @@ GoodGameGaming is an innovative web application designed for gaming enthusiasts.
 - implemnt filter by genre game index
 - fix some styling
 
+## Deploy Locally
+- Clone this Repo
+- In your terminal cd into the root of the cloned repo and run the following line `python3 manage.py runserver`
+
+## User Flow
+- User create edit and delete game tips and read game tips from other users
+- User create and delete game reviews and read game reviews from other users

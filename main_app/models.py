@@ -16,8 +16,9 @@ class Game(models.Model):
     esrb_rating = models.CharField(max_length=255, blank=True, null=True)
     genres = ArrayField(models.CharField(max_length=250), blank=True, null=True)
     # user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='games')
+
     def __str__(self):
-      return f"{self.name}"
+      return self.name
 
 class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')

@@ -18,7 +18,6 @@ def save_game_to_database(game_data):
     print(platform_names)
     defaults = {  # Populate defaults with data from game_data
         # Adjust this based on your actual Game model fields and their corresponding data in game_data
-        
         'name': game_data.get('name', ''),
         'rating': game_data.get('rating', 0.0),
         'released': datetime.strptime(game_data.get('released', ''), '%Y-%m-%d').date() if game_data.get('released') else None,
@@ -30,7 +29,7 @@ def save_game_to_database(game_data):
         'esrb_rating': game_data.get('esrb_rating', ''),
         'genres': genre_names
     }
-
+    
     game, created = Game.objects.get_or_create(id=game_data.get('id', 0), defaults=defaults)
     if not created:
         # Update the existing instance if it's not a new creation
