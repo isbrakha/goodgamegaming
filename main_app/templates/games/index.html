@@ -17,7 +17,7 @@
               </div>
               <!-- Add to Liked button with data-game-id attribute -->
               {% if not request.user.is_authenticated %}
-                <button></button>
+                <button>Log in to use feature</button>
               {% else %}
                 {% if game.id not in liked_game_ids %}
                 <button class="add-to-liked-button" 
