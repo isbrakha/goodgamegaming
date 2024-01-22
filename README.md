@@ -4,7 +4,7 @@
 GoodGameGaming - A Modern Gaming Review and Tips Platform
 
 ## Description
-GoodGameGaming is an innovative web application designed for gaming enthusiasts. It offers a comprehensive platform for users to explore, review, and share tips about their favorite video games. The application features a user-friendly interface, integrating gaming news, reviews, and community discussions.
+GoodGameGaming is an innovative web application designed for gaming enthusiasts. It offers a comprehensive platform for users to explore, review, and share tips about their favorite video games. 
 
 ## Screenshot(s)
 ![Landing Page](public/landing-page-ss.png)
