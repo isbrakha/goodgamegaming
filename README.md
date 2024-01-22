@@ -10,8 +10,6 @@ GoodGameGaming is an innovative web application designed for gaming enthusiasts.
 ![Landing Page](public/landing-page-ss.png)
 ![Game Detail](public/game-detail-ss.png)
 
-*Add more screenshots if necessary, and replace `path_to_landing_page_screenshot.png` with the actual file path of your screenshot.*
-
 ## Technologies Used
 - **Django:** A high-level Python Web framework that encourages rapid development and clean, pragmatic design.
 - **Python:** A programming language that lets you work quickly and integrate systems more effectively.
