@@ -29,3 +29,10 @@ GoodGameGaming is an innovative web application designed for gaming enthusiasts.
 - implemnt filter by genre game index
 - fix some styling
 
+## Deploy Locally
+- Clone this Repo
+- In your terminal cd into the root of the cloned repo and run the following line `python3 manage.py runserver`
+
+## User Flow
+- User can create edit and delete game tips and read game tips from other users
+- User can create and delete game reviews and read game reviews from other users
