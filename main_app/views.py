@@ -40,20 +40,23 @@ def games_index(request):
     # Check if it's an AJAX request
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         page = request.GET.get('page', 1)  # Get the page number from AJAX request
-        url = f'https://api.rawg.io/api/games?key=b714af7bd53b4d389217d6baab2bbdad&page={page}&page_size=20'
+        url = f'https://api.rawg.io/api/games?key=b714af7bd53b4d389217d6baab2bbdad&page={page}&page_size=30'
         response = requests.get(url)
         data = response.json()
         return JsonResponse(data)  # Send JSON response back to AJAX request
 
     # The initial, non-AJAX request loads the page normally with the first set of games
-    url = 'https://api.rawg.io/api/games?key=b714af7bd53b4d389217d6baab2bbdad&page=1&page_size=20'
+    url = 'https://api.rawg.io/api/games?key=b714af7bd53b4d389217d6baab2bbdad&page=1&page_size=30'
     response = requests.get(url)
     data = response.json()
     games = data["results"]
     for game in games:
-        game['genre_names'] = [genre['name'] for genre in game['genres']]
-    
-    # Render the page without using Paginator
+        genre_names = []
+        for genre in game['genres']:
+            genre_names.append(genre['name'])
+
+        game['genre_names'] = genre_names
+
     return render(request, 'games/index.html', {'games': games})
 
 
@@ -62,7 +65,7 @@ def add_to_liked(request):
     if request.method == 'POST':
         try:
             game_data = json.loads(request.POST.get('game_data'))
-            game_instance = Game(
+            Game.objects.get_or_create(
                 id=game_data['id'],
                 name=game_data['name'],
                 rating=game_data['rating'],
@@ -74,9 +77,15 @@ def add_to_liked(request):
                 description=game_data['description'],
                 esrb_rating=game_data['esrb_rating'],
                 genres=game_data['genres'],
-                user=request.user
+                # user=request.user
+                
             )
-            game_instance.save()
+
+            user = request.user
+            print('userprint',user)
+
+
+            
 
             return JsonResponse({'success': 'Game added successfully.'})
         except Exception as e:
@@ -95,7 +104,6 @@ def game_detail(request, game_id):
 
     # Try to get the game from your database
     game = Game.objects.get(id=game_id)
-
     # Fetch reviews and tips from  database
     reviews = Review.objects.filter(game=game)
     tips = Tip.objects.filter(game=game)
@@ -108,6 +116,7 @@ def game_detail(request, game_id):
             new_review = form.save(commit=False)
             new_review.game = game
             new_review.author = request.user
+            new_review.game.user = request.user
             new_review.save()
 
             # Associate the game with the current user if not already associated
@@ -119,6 +128,7 @@ def game_detail(request, game_id):
             new_tip = tip_form.save(commit=False)
             new_tip.game = game
             new_tip.author = request.user
+            new_tip.game.user = request.user
             new_tip.save()
 
             if game.user != request.user:

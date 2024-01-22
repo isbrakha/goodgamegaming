@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 
 class Game(models.Model):
-    id = models.IntegerField
+    api_id = models.IntegerField
     name = models.CharField(max_length=255, unique=True)
     rating = models.FloatField(blank=True, null=True)
     released = models.DateField(blank=True, null=True)
@@ -15,14 +15,16 @@ class Game(models.Model):
     description = models.TextField(blank=True, null=True)
     esrb_rating = models.CharField(max_length=255, blank=True, null=True)
     genres = ArrayField(models.CharField(max_length=250), blank=True, null=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='games')
+    # user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='games')
+    def __str__(self):
+      return f"{self.name}"
 
 class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
     # avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     bio = models.TextField(blank=True, null=True)
     # preferred_genres = models.ManyToManyField(Genre, related_name='user_profiles')
-    # liked_games = models.ManyToManyField(Game)
+    liked_games = models.ManyToManyField(Game)
 
     def __str__(self):
       return f"{self.user.username}'s profile"

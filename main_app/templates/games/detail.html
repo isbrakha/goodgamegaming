@@ -2,19 +2,17 @@
 {% block content %}
 {% load widget_tweaks %}
 <div class="row game-detail">
-    <!-- Image Column -->
     <div class="col s12 m6">
         <img class="responsive-img" src="{{ game.image }}" alt="{{ game.name }} Image">
     </div>
 
-    <!-- Details Column -->
     <div class="col s12 m6">
         <h3 class="white-text">{{ game.name }}</h3>
         <p class="white-text">Rating: {{ game.rating }}</p>
         <p class="white-text">Released: {{ game.released }}</p>
-        <!-- Add more details as needed -->
     </div>
 </div>
+<div class="white-text">{{ game.description|safe }}</div>
 
 {% if user.is_authenticated %}
     <button id="show-review-form-btn" class="btn red">Add Review</button>

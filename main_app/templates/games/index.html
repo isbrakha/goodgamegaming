@@ -17,6 +17,7 @@
                 <h2 class="yellow-text flow-text" style="margin-top: -.2rem;">{{ game.rating }}</h2>
               </div>
               <!-- Add to Liked button with data-game-id attribute -->
+              {if}
               <button class="add-to-liked-button" 
                   data-game-id="{{ game.id }}"
                   data-game-name="{{ game.name }}"
@@ -58,6 +59,7 @@ document.getElementById('load-more').addEventListener('click', function() {
           const gameDiv = document.createElement('div');
           gameDiv.className = 'col s12 m6 l4';
           // Populate gameDiv with game details
+          console.log('new function')
           gameDiv.innerHTML = `<a href="/games/${game.id}">
                                   <div class="game-info card grey">
                                       <div class="card-image image-container">
@@ -104,43 +106,59 @@ document.getElementById('load-more').addEventListener('click', function() {
   }
     // JavaScript/jQuery function to handle the "Add to Liked" button click
   $(document).ready(function() {
-      $('.add-to-liked-button').on('click', function(e) {
+    console.log('old function')
+      $('.row').on('click', '.add-to-liked-button', function(e) {
+        console.log('old click')
           e.preventDefault();
           const button = $(this);
           const genresData = button.data('game-genres').split(', ');
-          const genreNames = genresData.map(genre => genre.name);
-
+          console.log(genresData)
+          let genreNames = []
+          if (genresData.count > 1) {
+            genreNames = genresData.map(genre => genre.name);
+          } else {
+            genreNames = genresData
+          }
+          let esrb = button.data('game-esrb-rating')
+          esrb = esrb.replace(/'/g, `"`)
+          let parsedEsrb = JSON.parse(esrb)
+          console.log(parsedEsrb.name)
           const fixedPlatformData = sanitizePlatformData(button.data('game-platforms'))
           .replace(/None/g, 'null')
+          const gameId = button.data('game-id');
           const platformData = JSON.parse(fixedPlatformData);
           const platformNames = platformData.map(platforms => platforms.platform.name)
-          const gameData = {
-              id: button.data('game-id'),
-              name: button.data('game-name'),
-              rating: button.data('game-rating'),
-              released: button.data('game-released'),
-              image: button.data('game-image'),
-              platforms: platformNames,
-              developer: button.data('game-developer'),
-              publisher: button.data('game-publisher'),
-              description: button.data('game-description'),
-              esrb_rating: button.data('game-esrb-rating'),
-              genres: genreNames
-          };
-          $.ajax({
-              type: 'POST',
-              url: '{% url "add_game" %}',
-              data: {
-                  csrfmiddlewaretoken: '{{ csrf_token }}',
-                  game_data: JSON.stringify(gameData) // Convert the object to a JSON string
-              },
-              success: function(response) {
-                  console.log(response, "succes");
-                  button.text('Added to Liked').prop('disabled', true);
-              },
-              error: function(error) {
-                  console.error(error.responseJSON.error);
-              }
+          fetch(`https://api.rawg.io/api/games/${gameId}?key=b714af7bd53b4d389217d6baab2bbdad`)
+            .then(response => response.json())
+            .then(gameDetails => {
+              let gameDesc = gameDetails.description.replace(/<p>/g, '')
+              gameDesc = gameDesc.replace(/<p>/, '')
+              const gameData = {
+                  id: button.data('game-id'),
+                  name: button.data('game-name'),
+                  rating: button.data('game-rating'),
+                  released: button.data('game-released'),
+                  image: button.data('game-image'),
+                  platforms: platformNames,
+                  developer: button.data('game-developer'),
+                  publisher: button.data('game-publisher'),
+                  description: gameDetails.description,
+                  esrb_rating: parsedEsrb.name,
+                  genres: genreNames
+              
+              };
+              console.log(gameData.esrb_rating)
+              $.ajax({
+                  type: 'POST',
+                  url: '{% url "add_game" %}',
+                  data: {
+                      csrfmiddlewaretoken: '{{ csrf_token }}',
+                      game_data: JSON.stringify(gameData) // Convert the object to a JSON string
+                  },
+                  success: function(response) {
+                      button.text('Added to Liked').prop('disabled', true);
+                  },
+            })
           });
       });
 
