@@ -37,7 +37,7 @@
     <div id="tip-form" style="display: none;">
         <div class="tip-form">
             <h3 class="white-text">Write a Tip</h3>
-            <form  method="post">  <!-- Replace 'tip_create_url' with your actual URL name -->
+            <form  method="post">
                 {% csrf_token %}
                 {% for field in tip_form %}
                     <div class="input-field col s12">
