@@ -1,126 +1,72 @@
 {% extends 'base.html' %}
 {% block content %}
-  <div class="row">
-    {% for game in games %}
-      <div class="col s12 m6 l4">
-        <a href="{% url 'game_detail' game.id %}">
-          <div class="game-info card grey">
-            <div class="card-image image-container">
-                <img class="responsive-img" style="padding: .2rem; max-height: 100%;" src="{{ game.background_image }}" alt="{{ game.name }} Image">
-            </div>
-            <div class="card-content">
-              <div class="col s8">
-                <h2 class="white-text flow-text" style="margin-top: -.1rem ;">{{ game.name }}</h2>
-              </div>
-              <div class="col s4">
-                <h2 class="yellow-text flow-text" style="margin-top: -.2rem;">{{ game.rating }}</h2>
-              </div>
-              <!-- Add to Liked button with data-game-id attribute -->
-              {% if request.user.is_authenticated %}
-                {% if game.id not in liked_game_ids %}
-                  <button class="add-to-liked-button" 
-                      data-game-id="{{ game.id }}"
-                      data-game-name="{{ game.name }}"
-                      data-game-rating="{{ game.rating }}"
-                      data-game-released="{{ game.released }}"
-                      data-game-image="{{ game.background_image }}"
-                      data-game-platforms="{{ game.platforms}}"
-                      data-game-developer="{{ game.developer }}"
-                      data-game-publisher="{{ game.publisher }}"
-                      data-game-description="{{ game.description }}"
-                      data-game-esrb-rating="{{ game.esrb_rating }}"
-                      data-game-genres="{{ game.genre_names|join:', ' }}">
-                      Add to Liked
-                  </button>
-                {% else %}
-                  <button class="added-to-liked-button" disabled>
-                    Liked
-                  </button>
-                {% endif %}
-              {% else %}
-              <button></button>
-              {% endif %}
-            </div>
+<div class="row">
+  {% for game in games %}
+    <div class="col s12 m6 l4">
+      <a href="{% url 'game_detail' game.id %}">
+        <div class="game-info card grey">
+          <div class="card-image image-container">
+              <img class="responsive-img" style="padding: .2rem; max-height: 100%;" src="{{ game.background_image }}" alt="{{ game.name }} Image">
           </div>
-        </a>
-      </div>
-    {% endfor %}
-  </div>
-  <button id="load-more" data-next-page="{{ next_page }}">Load More Games</button>
-
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+          <div class="card-content">
+            <div class="col s8">
+              <h2 class="white-text flow-text" style="margin-top: -.1rem ;">{{ game.name }}</h2>
+            </div>
+            <div class="col s4">
+              <h2 class="yellow-text flow-text" style="margin-top: -.2rem;">{{ game.rating }}</h2>
+            </div>
+            {% if request.user.is_authenticated %}
+              {% if game.id not in liked_game_ids %}
+                <button class="add-to-liked-button" 
+                    data-game-id="{{ game.id }}"
+                    data-game-name="{{ game.name }}"
+                    data-game-rating="{{ game.rating }}"
+                    data-game-released="{{ game.released }}"
+                    data-game-image="{{ game.background_image }}"
+                    data-game-platforms="{{ game.platforms}}"
+                    data-game-developer="{{ game.developer }}"
+                    data-game-publisher="{{ game.publisher }}"
+                    data-game-description="{{ game.description }}"
+                    data-game-esrb-rating="{{ game.esrb_rating }}"
+                    data-game-genres="{{ game.genre_names|join:', ' }}">
+                    Add to Liked
+                </button>
+              {% else %}
+                <button class="added-to-liked-button" disabled>
+                  Liked
+                </button>
+              {% endif %}
+            {% else %}
+            <br/>
+            <br/>
+            {% endif %}
+          </div>
+        </div>
+      </a>
+    </div>
+  {% endfor %}
+</div>
+<div class="page-nav-container">
+{% if page > 1 %}
+  <a class="btn red" href="?page={{ page|add:-1 }}">Prev</a>
+{% endif %}
+  <a class="btn red" href="?page={{ page|add:1 }}">Next</a>
+</div>
 <script>
-let nextPage = 2; // Initialize nextPage variable
 
-document.getElementById('load-more').addEventListener('click', function() {
-  fetch(`/games/?page=${nextPage}`, {
-      headers: {
-          'X-Requested-With': 'XMLHttpRequest'
-      }
-  })
-  .then(response => response.json())
-  .then(data => {
-      // Assuming data.results contains the array of games
-      data.results.forEach(game => {
-          // Create game elements and append to the page
-          // For example, create a div for each game and append to a container on your page
-          const gameDiv = document.createElement('div');
-          gameDiv.className = 'col s12 m6 l4';
-          // Populate gameDiv with game details
-          console.log('new function')
-          gameDiv.innerHTML = `<a href="/games/${game.id}">
-                                  <div class="game-info card grey">
-                                      <div class="card-image image-container">
-                                          <img class="responsive-img" style="padding: .2rem; max-height: 100%;" src="${game.background_image}" alt="${game.name} Image">
-                                      </div>
-                                      <div class="card-content">
-                                          <div class="col s8">
-                                              <h2 class="white-text flow-text" style="margin-top: -.1rem;">${game.name}</h2>
-                                          </div>
-                                          <div class="col s4">
-                                              <h2 class="yellow-text flow-text" style="margin-top: -.2rem;">${game.rating}</h2>
-                                          </div>
-                                          <button class="add-to-liked-button" 
-                                            data-game-id="{{ game.id }}"
-                                            data-game-name="{{ game.name }}"
-                                            data-game-rating="{{ game.rating }}"
-                                            data-game-released="{{ game.released }}"
-                                            data-game-image="{{ game.background_image }}"
-                                            data-game-platforms="{{ game.platforms}}"
-                                            data-game-developer="{{ game.developer }}"
-                                            data-game-publisher="{{ game.publisher }}"
-                                            data-game-description="{{ game.description }}"
-                                            data-game-esrb-rating="{{ game.esrb_rating }}"
-                                            data-game-genres="{{ game.genre_names|join:', ' }}">
-                                            Add to Liked
-                                        </button>
-                                      </div>
-                                  </div>
-                              </a>`;
-          // Append the new gameDiv to your games container
-          document.querySelector('.row').appendChild(gameDiv);
-      });
-      nextPage++; // Increment nextPage for the next load
-  })
-  .catch(error => console.error('Error:', error));
-});
-
-  function sanitizePlatformData(platformData) {
-    // Replace double quotes within the class attribute with single quotes
-    const sanitizedData = platformData.replace(/'(?![^<]*>)/g, '"');
-    const finalizedSanitizedData = sanitizedData.replace(/class="([^"]*)"/g, 'class=\'$1\'');
-    
-    return finalizedSanitizedData;
-  }
-    // JavaScript/jQuery function to handle the "Add to Liked" button click
-  $(document).ready(function() {
-    console.log('old function')
+function sanitizePlatformData(platformData) {
+  // Replace double quotes within the class attribute with single quotes
+  const sanitizedData = platformData.replace(/'(?![^<]*>)/g, '"');
+  const finalizedSanitizedData = sanitizedData.replace(/class="([^"]*)"/g, 'class=\'$1\'');
+  
+  return finalizedSanitizedData;
+}
+$(document).ready(function() {
       $('.row').on('click', '.add-to-liked-button', function(e) {
         console.log('old click')
           e.preventDefault();
           const button = $(this);
           const genresData = button.data('game-genres').split(', ');
-          console.log(genresData)
           let genreNames = []
           if (genresData.count > 1) {
             genreNames = genresData.map(genre => genre.name);
@@ -129,8 +75,12 @@ document.getElementById('load-more').addEventListener('click', function() {
           }
           let esrb = button.data('game-esrb-rating')
           esrb = esrb.replace(/'/g, `"`)
-          let parsedEsrb = JSON.parse(esrb)
-          console.log(parsedEsrb.name)
+          let parsedEsrb;
+          if (esrb === 'None') {
+            parsedEsrb = {'name': 'No Rating'}
+          } else {
+            parsedEsrb= JSON.parse(esrb)
+          }
           const fixedPlatformData = sanitizePlatformData(button.data('game-platforms'))
           .replace(/None/g, 'null')
           const gameId = button.data('game-id');
@@ -164,7 +114,7 @@ document.getElementById('load-more').addEventListener('click', function() {
                       game_data: JSON.stringify(gameData) // Convert the object to a JSON string
                   },
                   success: function(response) {
-                      button.text('Added to Liked').prop('disabled', true);
+                      button.text('Liked').prop('disabled', true);
                   },
                   error: function(error) {
                     console.error('Error:', error.responseJSON.error);

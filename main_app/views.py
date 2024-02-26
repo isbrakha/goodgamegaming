@@ -22,11 +22,8 @@ def signup(request):
  
     form = UserCreationForm(request.POST)
     if form.is_valid():
-      # This will add the user to the database
       user = form.save()
-      # create userProfile
       UserProfile.objects.create(user=user)
-      # log in after sign up
       login(request, user)
       return redirect('home')
     else:
@@ -34,26 +31,19 @@ def signup(request):
       Username in use or incorrect password.
       Your password can't be entirely numeric.
       our password must contain at least 8 characters."""
-  # A bad POST or a GET request, so render signup.html with an empty form
+ 
   form = UserCreationForm()
   context = {'form': form, 'error_message': error_message}
   return render(request, 'registration/signup.html', context)
 
 def games_index(request):
-    # Check if it's an AJAX request
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        page = request.GET.get('page', 1)  # Get the page number from AJAX request
-        url = f'https://api.rawg.io/api/games?key=b714af7bd53b4d389217d6baab2bbdad&page={page}&page_size=30'
-        response = requests.get(url)
-        data = response.json()
-        return JsonResponse(data)  # Send JSON response back to AJAX request
     if request.user.is_authenticated:
         user_profile = UserProfile.objects.get(user=request.user)
         liked_game_ids = user_profile.liked_games.values_list('id', flat=True)
     else: 
         liked_game_ids = False
-
-    url = 'https://api.rawg.io/api/games?key=b714af7bd53b4d389217d6baab2bbdad&page=1&page_size=30'
+    page = int(request.GET.get('page',1))    
+    url = f'https://api.rawg.io/api/games?key=b714af7bd53b4d389217d6baab2bbdad&page={page}&page_size=30'
     response = requests.get(url)
     data = response.json()
     games = data["results"]
@@ -64,7 +54,9 @@ def games_index(request):
 
         game['genre_names'] = genre_names
 
-    return render(request, 'games/index.html', {'games': games, 'liked_game_ids': liked_game_ids})
+
+ 
+    return render(request, 'games/index.html', {'games': games, 'liked_game_ids': liked_game_ids, 'page': page})
 
 
 @login_required
@@ -73,16 +65,14 @@ def add_to_liked(request):
         try:
             game_data = json.loads(request.POST.get('game_data'))
             game_id = game_data.get('id')
-
+            print(game_id)
             if not game_id:
                 return JsonResponse({'error': 'Game ID is missing'}, status=400)
 
-            # Parsing date fields
             released_date = None
             if game_data.get('released'):
                 released_date = datetime.strptime(game_data['released'], '%Y-%m-%d').date()
 
-            # Using get_or_create with proper defaults
             game, created = Game.objects.get_or_create(
                 id=game_id,
                 defaults={
@@ -114,12 +104,10 @@ def game_detail(request, game_id):
     response = requests.get(url)
     game_data = response.json()
 
-    # Save game data to the database
     save_game_to_database(game_data)
 
-    # Try to get the game from your database
     game = Game.objects.get(id=game_id)
-    # Fetch reviews and tips from  database
+    # fetch reviews and tips from  database
     reviews = Review.objects.filter(game=game)
     tips = Tip.objects.filter(game=game)
 
@@ -134,7 +122,7 @@ def game_detail(request, game_id):
             new_review.game.user = request.user
             new_review.save()
 
-            # Associate the game with the current user if not already associated
+            # assocaite game with user
             if game.user != request.user:
                 game.user = request.user
                 game.save()
@@ -179,10 +167,8 @@ def delete_tip(request, tip_id):
 
 def update_tip(request, tip_id):
     if request.method == 'POST':
-        # Get the tip object to update
         tip = get_object_or_404(Tip, pk=tip_id)
 
-        # Update the content based on the POST data
         new_content = request.POST.get('content')
         tip.content = new_content
         tip.save()
